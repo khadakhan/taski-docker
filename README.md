@@ -8,7 +8,7 @@ The application has two lists depending on the task status:
 * not completed
 
 You can create, edit, delete, transfer a task from one status to another.
-We will deploy this project on a server in containers using CI/CD.
+We will deploy this project locally and then on a server in containers using CI/CD.
 
 # Deploy localy
 The Docker containers we will be working with will use Linux as the operating system kernel. For Windows 10 and 11: install Windows Subsystem for Linux.
