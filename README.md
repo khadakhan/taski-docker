@@ -50,7 +50,7 @@ There are also other files that should be added to .dockerignore:
 Project migrations should be included in the image, do not add them to .dockerignore.
 
 ## Building the Taski-docker backend image.
-Make sure Docker is running. Open a terminal, go to the backend/ directory of the Taski project and build the image:
+Make sure Docker is running. Open a terminal, go to the backend/ directory of the Taski-docker project and build the image:
 ```
 docker build -t taski_backend .
 ```
@@ -67,7 +67,7 @@ docker exec taski_backend_container python manage.py migrate
 Stop the container with Ctrl+C in the same terminal or with the command docker container stop taski_backend_container in a new terminal window. This will remove the container.
 
 ## Building the Taski-docker frontend image.
-The Dockerfile must be placed in the frontend/ folder of the Taski project.
+The Dockerfile must be placed in the frontend/ folder of the Taski-docker project.
 The image in the app/build/ folder will store
 static files (HTML, JS, and CSS) of the frontend application.
 
@@ -93,7 +93,7 @@ Run the container interactively, with the -it switch, and bind port 8000 of the 
 ```
 docker run --rm -it -p 8000:8000 --name taski_frontend_test taski_frontend
 ```
-Open a browser and make sure that the Taski frontend is accessible at http://127.0.0.1:8000/. The frontend SPA does not interact with the backend yet: for this, you will need to configure them to run together; however, the web page opens successfully.
+Open a browser and make sure that the Taski-docker frontend is accessible at http://127.0.0.1:8000/. The frontend SPA does not interact with the backend yet: for this, you will need to configure them to run together; however, the web page opens successfully.
 
 Stop the container with the Ctrl+C shortcut or run docker container stop taski_frontend_test in a new terminal window. This will remove the container.
 
@@ -181,12 +181,12 @@ docker exec taski_backend_container python manage.py migrate
 ```
 Now when you stop the containers, the database information will be saved on the host.
 
-## container and config for Nginx
+## Сontainer and config for Nginx
 Prepare to launch the container with Nginx - create a gateway/ folder in the root of the project with two files:
 * Dockerfile - to create an Nginx image with the necessary settings;
 * nginx.conf - to configure the Nginx server.
 
-## backend statics
+## Backend statics
 First, in the Taski project, configure the collection of statics in the collected_static/ folder. In the settings.py file, check the value of the STATIC_URL constant and add the STATIC_ROOT constant:
 ```
 # When planning the architecture, it was decided that
@@ -226,7 +226,7 @@ In docker-compose.yml, you need to make a couple of changes to the frontend cont
 declare the /frontend_static/ directory association with the static volume (the directory will be created automatically);
 add the command key and run the file copy command: cp -r /app/build/. /frontend_static/.
 
-## local run
+## Local run
 Restart Docker Compose and check the main page http://localhost:8000/:
 ```
 docker compose stop && docker compose up
@@ -338,19 +338,19 @@ docker run --name db \
        -v pg_data:/var/lib/postgresql/data \
        postgres:13.10
 ```
-Запустить консольный клиент psql в контейнере
+Run console psql client in container
 ```
 docker exec -it db psql -U django_user -d Django
 ```
-Создать сеть
+Create network
 ```
 docker network create django-network
 ```
-Присоединить к сети django-network контейнер db, который уже запущен
+Attach to network django-network container db, which is already running
 ```
 docker network connect django-network db
 ```
-Запуск Django контейнера с подключением к сети
+Start Django container with network connection
 ```
 docker run --env-file .env \
            --net django-network \
@@ -400,21 +400,21 @@ To remove both containers and volumes, run the command
 ``` 
 docker compose down -v 
 ```
-Увидеть список таких безымянных образов (они называются dangling, англ. «болтающиеся») можно так:
+You can see a list of such unnamed images (they are called dangling) like this:
 ```
 docker image ls -f "dangling=true" -q
 ```
-Почистить компьютер от таких образов можно такой командой:
+You can clean your computer from such images with this command:
 ```
 docker image rm $(docker image ls -f "dangling=true" -q)
 ```
 
-# Deploy on server. CI/CD
+# Deploy on server
 ## Create docker-compose.production
-Создадим отдельный файл конфигурации Docker Compose, который будет управлять запуском контейнеров на боевом сервере. Он будет аналогичен тому, который уже есть, но в нём будут использоваться собранные образы из Docker Hub.
+Let's create a separate Docker Compose configuration file that will manage the launch of containers on the production server. It will be similar to the one that already exists, but it will use the built images from Docker Hub.
 
-## Устанавливаем Docker Compose на сервер
-Поочерёдно выполните на сервере команды для установки Docker и Docker Compose для Linux. Наберитесь терпения: установка займёт некоторое время. Выполнять их лучше в домашней директории пользователя (переместиться в неё поможет команда cd без аргументов).
+## Install Docker Compose on the server
+Run the commands to install Docker and Docker Compose for Linux on the server one by one. Be patient: the installation will take some time. It is better to run them in the user's home directory (the cd command without arguments will help you move to it).
 ```
 sudo apt update
 sudo apt install curl
@@ -423,42 +423,42 @@ sudo sh ./get-docker.sh
 sudo apt install docker-compose-plugin
 ```
 
-## Запускаем Docker Compose на сервере
-Скопируйте на сервер в директорию taski/ файл docker-compose.production.yml. Сделать это можно, например, при помощи утилиты SCP (secure copy) — она предназначена для копирования файлов между компьютерами. Зайдите на своём компьютере в директорию taski/ и выполните команду копирования:
+## Run Docker Compose on the server
+Copy the docker-compose.production.yml file to the taski/ directory on the server. You can do this, for example, using the SCP (secure copy) utility — it is designed to copy files between computers. Go to the taski/ directory on your computer and run the copy command:
 ```
 scp -i path_to_SSH/SSH_name docker-compose.production.yml \
-    username@server_ip:/home/username/taski/docker-compose.production.yml
+username@server_ip:/home/username/taski/docker-compose.production.yml
 ```
-* path_to_SSH — путь к файлу с SSH-ключом;
-* SSH_name — имя файла с SSH-ключом (без расширения);
-* username — ваше имя пользователя на сервере;
-* server_ip — IP вашего сервера.
+* path_to_SSH — path to the file with the SSH key;
+* SSH_name — name of the file with the SSH key (without extension);
+* username — your username on the server;
+* server_ip — IP of your server.
 
-Есть и другой вариант: создайте на сервере пустой файл docker-compose.production.yml и с помощью редактора nano добавьте в него содержимое из локального docker-compose.production.yml.
+Another option is to create an empty docker-compose.production.yml file on the server and use the nano editor to add the contents of the local docker-compose.production.yml to it.
 
-Скопируйте файл .env на сервер, в директорию taski/.
+Copy the .env file to the server, in the taski/ directory.
 
-Для запуска Docker Compose в режиме демона команду docker compose up нужно запустить с флагом -d
+To run Docker Compose in daemon mode, run docker compose up with the -d flag
 ```
 sudo docker compose -f docker-compose.production.yml up -d
-``` 
-Проверьте, что все нужные контейнеры запущены:
+```
+Check that all required containers are running:
 ```
 sudo docker compose -f docker-compose.production.yml ps
 ```
-Выполните миграции, соберите статические файлы бэкенда и скопируйте их в /backend_static/static/:
+Run migrations, collect backend static files and copy them to /backend_static/static/:
 ```
-sudo docker compose -f docker-compose.production.yml exec backend pyth on manage.py migrate 
+sudo docker compose -f docker-compose.production.yml exec backend pyth on manage.py migrate
 
-sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic 
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 
-sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/ 
+sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
 
-## Перенаправляем все запросы в докер
-Было так:
+## Redirect all requests to docker:
+Earlier we have already deployed the taski application manually on the server without using docker, so the nginx settings remain:
 ```
-# До этой строки — остальная часть секции server
+# Up to this line is the rest of the server section
     location /api/ {
         proxy_set_header Host $http_host;
         proxy_pass http://127.0.0.1:8000;
@@ -474,22 +474,61 @@ sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/col
         index  index.html index.htm;
         try_files $uri /index.html =404;
     }
-# Ниже идёт часть про certbot
+# Below is the part about certbot
 ```
-Должно стать так (три блока location заменяем на один):
+It should look like this (replace three location blocks with one):
 ```
-# Всё до этой строки оставляем как было.
+# Leave everything up to this line as it was.
     location / {
         proxy_set_header Host $http_host;
         proxy_pass http://127.0.0.1:8000;
     }
-# Ниже ничего менять не нужно.
+# You don't need to change anything below.
 ```
-Чтобы убедиться, что в конфиге нет ошибок — выполните команду проверки конфигурации:
+To make sure there are no errors in the config, run the configuration check command:
 ```
 sudo nginx -t
 ```
-Перезагрузите конфиг Nginx:
+Reload the Nginx config:
 ```
 sudo service nginx reload
 ```
+Open your project's admin page in your browser again - https://your_domain/ and check that everything is working
+
+# Deployment automation: CI/CD
+Create a .github/workflows directory in the taski-docker/ folder, and in it — a main.yml file like in the repository.
+
+Save the variables:
+* DOCKER_USERNAME
+* DOCKER_PASSWORD
+* SSH_KEY - should contain the contents of a text file with a private SSH key
+* SSH_PASSPHRASE
+* USER - user on the server
+* HOST - IP address of your server
+
+with the necessary values ​​in the project secrets on GitHub
+
+## Report in Telegram
+Add the Telegram account parameters to the secrets for sending the report:
+* in the TELEGRAM_TO variable, save the ID of your Telegram account. You can find out your ID from the Telegram bot @userinfobot. The bot will send notifications to the account with the specified ID;
+* in the TELEGRAM_TOKEN variable, save the token of your bot. You can get this token from the telegram bot @BotFather.
+![alt text](pipline-1.png)
+
+Now your workflow consists of four phases:
+
+Project testing.
+
+Building and publishing the image.
+
+Automatic deployment.
+
+Sending a notification to a personal chat.
+
+# Instruments and stack
+#python #javascript #css #django #djangorestframework #REST API #bash #gunicorn #nginx #SSH #Docker # GitHub Actions
+
+# Author
+As an example, you can see the application at work at:
+https://taskido.zapto.org/
+
+Project author: [khadakhan](https://github.com/khadakhan/)
