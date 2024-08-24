@@ -1,3 +1,5 @@
+[![Main Taski workflow](https://github.com/khadakhan/taski-docker/actions/workflows/main.yml/badge.svg)](https://github.com/khadakhan/taski-docker/actions/workflows/main.yml)
+
 # Taski-docker
 The simplest application for planning your tasks.  This project consists of a backend application on Django and a frontend application on React.
 
